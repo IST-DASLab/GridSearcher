@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name='gridrunner'
+version='1.0.0'
+authors = [
+    {name = "Ionut-Vlad Modoranu", email = "ionut-vlad.modoranu@ist.ac.at"}
+]
+maintainers = [
+    {name = "Ionut-Vlad Modoranu", email = "ionut-vlad.modoranu@ist.ac.at"},
+]
+description = "GridSearcher simplifies running grid searches for machine learning projects in Python, emphasizing parallel execution and GPU scheduling without dependencies on SLURM or other workload managers."
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = [
+    "grid search",
+    "automatization",
+    "utilitary software",
+    "process management",
+    "process schedulers",
+]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+]
+
+[project.urls]
+Repository = 'https://github.com/IST-DASLab/GridSearcher'
