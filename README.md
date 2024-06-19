@@ -56,9 +56,6 @@ command 9: python3 myscript.py --batch_size 128 --epochs 100 --lr_decay_at 82 12
 command 10: python3 myscript.py --batch_size 128 --epochs 100 --lr_decay_at 82 123 --wandb_project cifar10-training --wandb_group cifar10_rn18_adamw_E=100_bs=128 --wandb_job_type lr=1e-2_wd=1e-3_beta1=0.9_beta2=0.999_eps=1e-8 --wandb_name seed=3_2024-06-19_23-04-23 --seed 3 --lr 1e-2 --wd 1e-3 --beta1 0.9 --beta2 0.999 --eps 1e-8 --root_folder ./results/cifar10-training/cifar10_rn18_adamw_E=100_bs=128/lr=1e-2_wd=1e-3_beta1=0.9_beta2=0.999_eps=1e-8/seed=3_2024-06-19_23-04-23
 command 11: python3 myscript.py --batch_size 128 --epochs 100 --lr_decay_at 82 123 --wandb_project cifar10-training --wandb_group cifar10_rn18_adamw_E=100_bs=128 --wandb_job_type lr=1e-3_wd=1e-2_beta1=0.9_beta2=0.999_eps=1e-8 --wandb_name seed=3_2024-06-19_23-04-23 --seed 3 --lr 1e-3 --wd 1e-2 --beta1 0.9 --beta2 0.999 --eps 1e-8 --root_folder ./results/cifar10-training/cifar10_rn18_adamw_E=100_bs=128/lr=1e-3_wd=1e-2_beta1=0.9_beta2=0.999_eps=1e-8/seed=3_2024-06-19_23-04-23
 command 12: python3 myscript.py --batch_size 128 --epochs 100 --lr_decay_at 82 123 --wandb_project cifar10-training --wandb_group cifar10_rn18_adamw_E=100_bs=128 --wandb_job_type lr=1e-3_wd=1e-3_beta1=0.9_beta2=0.999_eps=1e-8 --wandb_name seed=3_2024-06-19_23-04-23 --seed 3 --lr 1e-3 --wd 1e-3 --beta1 0.9 --beta2 0.999 --eps 1e-8 --root_folder ./results/cifar10-training/cifar10_rn18_adamw_E=100_bs=128/lr=1e-3_wd=1e-3_beta1=0.9_beta2=0.999_eps=1e-8/seed=3_2024-06-19_23-04-23
-
-Process finished with exit code 0
-
 ```
 
 
