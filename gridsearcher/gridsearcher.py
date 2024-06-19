@@ -131,7 +131,7 @@ class GridSearcher:
 
         self.exp_folder_template = deepcopy(exp_folder)
         os.system('cls' if on_windows() else 'clear')
-        print(f'ExperimentBuilder PID: {os.getpid()}')
+        print(f'GridSearcher PID: {os.getpid()}')
 
         cmds = [] # will store all commands to be run (as strings)
         cmds_dict = [] # will store dictionaries containing key:value pairs of hyper-parameters
@@ -219,7 +219,7 @@ class GridSearcher:
                     lock_release() # make sure there are no lock files on disk before starting pool
                     pool.map(func=waiting_worker, iterable=params_list)
 
-            print('ExperimentBuilder process ended. Summary:')
+            print('GridSearcher ended. Summary:')
             print(console_info)
 
     def _create_root_arg(self, param_name_for_exp_root_folder, exp_folder):
