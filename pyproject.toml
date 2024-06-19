@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name='gridrunner'
+name='gridsearcher'
 version='1.0.0'
 authors = [
     {name = "Ionut-Vlad Modoranu", email = "ionut-vlad.modoranu@ist.ac.at"}
