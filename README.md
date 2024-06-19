@@ -39,8 +39,8 @@ pip install gridsearcher
 
 ---
 
-We provide a minimal working example in the file [example.py](https://github.com/IST-DASLab/GridSearcher/blob/main/example.py), 
-that has the following output:
+We provide a minimal working example in the file [example.py](https://github.com/IST-DASLab/GridSearcher/blob/main/example.py).
+Just set `debug=True` with `debug=False` in the `run` method call to run on GPUs. The output of `example.py` is the following:
 
 ```shell 
 GridSearcher PID: 8940
