@@ -39,7 +39,7 @@ pip install gridsearcher
 
 ---
 
-We provide a minimal working example in the file [example.py](https://github.com/ionutmodo/GridSearcher/blob/main/example.py).
+We provide a minimal working example in the file [example.py](https://github.com/IST-DASLab/GridSearcher/blob/main/example.py).
 
 
 # Contribute 🤝
