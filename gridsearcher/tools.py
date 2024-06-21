@@ -115,11 +115,12 @@ def waiting_worker(params):
         cmd = f'{clb} {cvd} {exe} {cmd}'.strip()
 
     print(cmd)
-    os.system(cmd)
+    code = os.system(cmd)
 
-    # write state.finished file to mark that the experiment was finished
-    with open(os.path.join(root, 'state.finished'), 'w'):
-        pass
+    if code == 0:
+        # write state.finished file to mark that the experiment was finished
+        with open(os.path.join(root, 'state.finished'), 'w'):
+            pass
 
     if not dist_train: # if we are not in distributed settings, decrease the number of processes for the GPU that finished the run
         lock_acquire()
