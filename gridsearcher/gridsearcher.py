@@ -118,6 +118,8 @@ class GridSearcher:
         assert 'params_values' in scheduling.keys(), 'scheduling requires `params_values` key'
         assert 'max_jobs_per_gpu' in scheduling.keys(), 'scheduling requires `max_jobs_per_gpu` key'
         assert 'distributed_training' in scheduling.keys(), 'scheduling requires `distributed_training` key'
+        for k in scheduling['params_values'].keys():
+            assert isinstance(scheduling['params_values'][k], list), f'They key "{k}" in scheduling["params_values"] must be of type list!'
 
         # remove duplicate values to avoid wasting computations
         for k in scheduling['params_values'].keys():
