@@ -67,5 +67,6 @@ We welcome contributions! If you have suggestions for new features or improvemen
 pull request.
 
 # Versions history:
+- **1.0.2**: checking the return code of `os.system` and create file `state.finished` only if `code == 0`
 - **1.0.1**: added assert statement to make sure that all values in the `scheduling["params_values"]` are of type list
 - **1.0.0**: added initial project
