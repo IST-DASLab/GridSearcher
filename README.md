@@ -65,3 +65,7 @@ command 12: python3 myscript.py --batch_size 128 --epochs 100 --lr_decay_at 82 1
 
 We welcome contributions! If you have suggestions for new features or improvements, feel free to open an issue or submit a 
 pull request.
+
+# Versions history:
+- **1.0.1**: added assert statement to make sure that all values in the `scheduling["params_values"]` are of type list
+- **1.0.0**: added initial project
