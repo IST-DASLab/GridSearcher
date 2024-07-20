@@ -23,7 +23,7 @@ def validate_constructor_params(
         Performs some checks on the constructor parameters.
     """
     # assert os.path.isfile(script), 'Script does not exist'
-    assert script.endswith('.py'), 'Script does not end with .py'
+    # assert script.endswith('.py'), 'Script does not end with .py'
     assert isinstance(exe, GSExe), f'Variable exe must be of type {GSExe}'
     assert exe.value in [x.value for x in GSExe], 'exe must be either "python" or "composer"'
     assert isinstance(key_value_separator, GSKeyValSep), f'Variable exe must be of type {GSKeyValSep}'
