@@ -58,6 +58,29 @@ command 11: python3 myscript.py --batch_size 128 --epochs 100 --lr_decay_at 82 1
 command 12: python3 myscript.py --batch_size 128 --epochs 100 --lr_decay_at 82 123 --wandb_project cifar10-training --wandb_group cifar10_rn18_adamw_E=100_bs=128 --wandb_job_type lr=1e-3_wd=1e-3_beta1=0.9_beta2=0.999_eps=1e-8 --wandb_name seed=3_2024-06-19_23-04-23 --seed 3 --lr 1e-3 --wd 1e-3 --beta1 0.9 --beta2 0.999 --eps 1e-8 --root_folder ./results/cifar10-training/cifar10_rn18_adamw_E=100_bs=128/lr=1e-3_wd=1e-3_beta1=0.9_beta2=0.999_eps=1e-8/seed=3_2024-06-19_23-04-23
 ```
 
+# SBATCH wrapper for SLURM (NEW in version 1.0.4)
+We also added a wrapper for SBATCH that allows running SLURM jobs directly from Python!
+
+```python
+from gridsearcher import SBATCH
+
+SBATCH(
+    script='h100-eval.sh',
+    env_vars=dict(
+        var1=val1,
+        var2=val2,
+    ),
+    job_name=f'job-name-here',
+    nodelist='big-machine', # or None if you don't want to specify --nodelist
+    out_err_folder='slurm_output', # the folder where the files output and error will be saved
+    ntasks=1,
+    cpus_per_task=32,
+    time='1:00:00', # change according to your needs
+    mem='100G', # change according to your needs
+    partition='gpu100', # change according to your needs
+    gres='gpu:H100:1' # change according to your needs
+).run()
+```
 
 # Contribute 🤝
 
@@ -67,6 +90,7 @@ We welcome contributions! If you have suggestions for new features or improvemen
 pull request.
 
 # Versions history:
+- **1.0.4**: added SBATCH class, which can be used in a completely separated manner from GridSearcher, allowing running slurm jobs from python
 - **1.0.3**: do not check whether the script ends with `.py` extension anymore
 - **1.0.2**: checking the return code of `os.system` and create file `state.finished` only if `code == 0`
 - **1.0.1**: added assert statement to make sure that all values in the `scheduling["params_values"]` are of type list
