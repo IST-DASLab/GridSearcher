@@ -70,15 +70,17 @@ SBATCH(
         var1=val1,
         var2=val2,
     ),
-    job_name=f'job-name-here',
-    nodelist='big-machine', # or None if you don't want to specify --nodelist
-    out_err_folder='slurm_output', # the folder where the files output and error will be saved
-    ntasks=1,
-    cpus_per_task=32,
-    time='1:00:00', # change according to your needs
-    mem='100G', # change according to your needs
-    partition='gpu100', # change according to your needs
-    gres='gpu:H100:1' # change according to your needs
+    sbatch_args=dict(
+        job_name=f'job-name-here',
+        nodelist='big-machine', # or None if you don't want to specify --nodelist
+        out_err_folder='slurm_output', # the folder where the files output and error will be saved
+        ntasks=1,
+        cpus_per_task=32,
+        time='1:00:00', # change according to your needs
+        mem='100G', # change according to your needs
+        partition='gpu100', # change according to your needs
+        gres='gpu:H100:1' # change according to your needs
+    )
 ).run()
 ```
 
