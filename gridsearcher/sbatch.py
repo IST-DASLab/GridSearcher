@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 class SBATCH:
     def __init__(self,

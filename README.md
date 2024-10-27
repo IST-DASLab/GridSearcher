@@ -92,6 +92,7 @@ We welcome contributions! If you have suggestions for new features or improvemen
 pull request.
 
 # Versions history:
+- **1.1.1**: fixed import issues
 - **1.1.0**: removed specific arguments and replaced them with dictionaries to offer flexibility to use any SBATCH params
 - **1.0.4**: added SBATCH class, which can be used in a completely separated manner from GridSearcher, allowing running slurm jobs from python
 - **1.0.3**: do not check whether the script ends with `.py` extension anymore
