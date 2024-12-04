@@ -62,25 +62,30 @@ command 12: python3 myscript.py --batch_size 128 --epochs 100 --lr_decay_at 82 1
 We also added a wrapper for SBATCH that allows running SLURM jobs directly from Python!
 
 ```python
-from gridsearcher import SBATCH
-
 SBATCH(
-    script='h100-eval.sh',
-    env_vars=dict(
-        var1=val1,
-        var2=val2,
+    script='script.sh', # the shell script that will be launched using sbatch
+    env_vars=dict( # these variables will be set in the --export argument of sbatch and will be available in the h100-eval.sh script
+        root=ROOT,
+        wandb_project=wandb_project,
+        wandb_group=run.group,
+        wandb_job_type=run.job_type,
+        wandb_name=run.name,
+        wandb_run_id=run.id,
+        task=TASK,
+        batch_size=BATCH_SIZE,
     ),
-    sbatch_args=dict(
-        job_name=f'job-name-here',
-        nodelist='big-machine', # or None if you don't want to specify --nodelist
-        out_err_folder='slurm_output', # the folder where the files output and error will be saved
-        ntasks=1,
-        cpus_per_task=32,
-        time='1:00:00', # change according to your needs
-        mem='100G', # change according to your needs
-        partition='gpu100', # change according to your needs
-        gres='gpu:H100:1' # change according to your needs
-    )
+    sbatch_args={ # the variables below will be added to the sbatch command (e.g. --job_name)
+        'exclude': 'machine-1,machine-2',
+        'job-name': f'{JOB_NAME}-{run.id}',
+        'error': 'slurm_output/%j-%x.err',
+        'output': 'slurm_output/%j-%x.out',
+        'ntasks': 1,
+        'cpus-per-task': args.cpus_per_task,
+        'time': args.time,
+        'mem': args.mem,
+        'partition': args.partition,
+        'gres': args.gres,
+    }
 ).run()
 ```
 
