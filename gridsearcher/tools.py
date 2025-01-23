@@ -56,7 +56,7 @@ def waiting_worker(params):
     """
         This method will run an experiment with a single element of the cartesian product, on a single process.
     """
-    exe, index, cmd, root, cmd_dict, gpu_processes_count, gpus, max_jobs, dist_train, launch_blocking, torchrun = params
+    exe, index, cmd, root, cmd_dict, gpu_processes_count, gpus, max_jobs, dist_train, launch_blocking, torchrun, create_state_finished = params
 
     n_gpus = len(gpus)
     """
@@ -117,7 +117,7 @@ def waiting_worker(params):
     print(cmd)
     code = os.system(cmd)
 
-    if code == 0:
+    if code == 0 and create_state_finished:
         # write state.finished file to mark that the experiment was finished
         with open(os.path.join(root, 'state.finished'), 'w'):
             pass

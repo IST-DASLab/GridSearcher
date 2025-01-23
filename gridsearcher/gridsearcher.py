@@ -96,7 +96,8 @@ class GridSearcher:
             scheduling: dict,
             launch_blocking: bool = False,
             torchrun: bool = False,
-            debug: bool = False):
+            debug: bool = False,
+            create_state_finished: bool = True):
         """
             Runs the GridSearcher using the provided configuration.
             :param param_name_for_exp_root_folder: set this parameter to the name of the cmd argument for the output directory of your script.
@@ -113,6 +114,7 @@ class GridSearcher:
             :param launch_blocking: when set to True, the all programs will be run with the flag CUDA_LAUNCH_BLOCKING=1
             :param torchrun: whether to run with torchrun or not
             :param debug: print commands if True, run commands if False
+            :param create_state_finished: whether to create the file "state.finished" or not
         """
         assert 'gpus' in scheduling.keys(), 'scheduling requires `gpu` key'
         assert 'params_values' in scheduling.keys(), 'scheduling requires `params_values` key'
@@ -212,7 +214,8 @@ class GridSearcher:
                         scheduling['max_jobs_per_gpu'], # how many jobs we accept per GPU
                         scheduling['distributed_training'], # whether to do distributed training on multiple GPUs or not
                         launch_blocking, # whether to run with CUDA_LAUNCH_BLOCKING=1 or not
-                        torchrun # whether to run the scripts with torchrun or not
+                        torchrun, # whether to run the scripts with torchrun or not
+                        create_state_finished
                     )
                     for index, tpl in enumerate(params_list)
                 ]
