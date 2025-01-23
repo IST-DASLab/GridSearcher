@@ -96,6 +96,8 @@ We welcome contributions! If you have suggestions for new features or improvemen
 pull request.
 
 # Versions history:
+- **1.1.2** @ 2025-01-23:
+  - added `create_state_finished` parameter to control whether the process writes the file `state.finished` when returns with error code 0 or not
 - **1.1.1**: fixed import issues
 - **1.1.0**: removed specific arguments and replaced them with dictionaries to offer flexibility to use any SBATCH params
 - **1.0.4**: added SBATCH class, which can be used in a completely separated manner from GridSearcher, allowing running slurm jobs from python
