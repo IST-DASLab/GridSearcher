@@ -3,37 +3,10 @@ from string import Template
 from itertools import product
 from copy import deepcopy
 from .tools import *
+from .configs import SchedulingConfig, TorchRunConfig
 
 FW_DICT = {'.': 'DOT', '-': 'DASH'}
 BW_DICT = {v: k for k, v in FW_DICT.items()} # will contain { 'DOT': '.', 'DASH': '-' }
-
-def backward_key_replace(key):
-    """
-        Replaces the characters given by BW_DICT.keys() with BW_DICT.values()
-        Example:
-        - if scheduling['params_values'] has a key called 'trainingDOTlr', this function will convert it to 'training.lr'; same for DASH
-
-        This method is used when creating the command by replacing DOT and DASH words to the corresponding characters.
-    """
-    return key_replace(BW_DICT, key)
-
-def forward_key_replace(key):
-    """
-        Replaces the characters given by FW_DICT.keys() with FW_DICT.values()
-        Example:
-        - if scheduling['params_values'] has a key called 'training.lr', this function will convert it to 'trainingDOTlr'; same for DASH
-
-        This method is used when storing the paameters key:value in __dict__ because keys in this dictionary cannot contain dots or dashes.
-    """
-    return key_replace(FW_DICT, key)
-
-def key_replace(d, key):
-    """
-        Iterates through the dictionary `d` and replaces strings from keys with strings from values
-    """
-    for dk, dv in d.items():
-        key = key.replace(dk, dv)
-    return key
 
 class GridSearcher:
     def __init__(self,
@@ -43,6 +16,7 @@ class GridSearcher:
                  key_value_separator: GSKeyValSep = GSKeyValSep.SPACE,
                  use_dashes=True):
         """
+        Description:
             Creates a GridSearcher object to run experiments using a grid.
             :param script: absolute path to the python script to run
             :param exe: instance of GridSearcherExe
@@ -63,7 +37,10 @@ class GridSearcher:
 
     def add_from_yaml(self, yaml_file):
         """
+        Description:
             This method allows adding parameters to a GridSearcher object from a YAML file.
+
+        Args:
             :param yaml_file: absolute path to the YAML file
         """
         if os.path.isfile(yaml_file):
@@ -73,7 +50,10 @@ class GridSearcher:
 
     def add_param(self, key, value):
         """
+        Description:
             Adds a parameter to the command line args list in __dict__ in the form "--name value"
+
+        Args:
             :param key: The name of the parameter, which will be preceded by two dashes ("--") if use_dashes=True
             :param value: The value for the parameter. If it's a Template, it will be filled with the values of already existing parameters
         """
@@ -93,45 +73,32 @@ class GridSearcher:
     def run(self,
             param_name_for_exp_root_folder: str,
             exp_folder: Template,
-            scheduling: dict,
-            launch_blocking: bool = False,
-            torchrun: bool = False,
             debug: bool = False,
-            create_state_finished: bool = True):
+            create_state_finished: bool = True,
+            cfg_sched: SchedulingConfig,
+            cfg_torchrun: TorchRunConfig):
         """
+        Description:
             Runs the GridSearcher using the provided configuration.
-            :param param_name_for_exp_root_folder: set this parameter to the name of the cmd argument for the output directory of your script.
-            For example, if your script uses "output_dir" directory for writing checkpoints, then set this parameter to "output_dir" and it
-            will automatically be filled with the value of `exp_folder`, being equivalent to "--output_dir=exp_folder". Note that `exp_folder`
-            parameter can be a template, which might make it easy for you to embed some hyper-parameters to this folder.
+
+        Args:
+            :param param_name_for_exp_root_folder: set this parameter to the name of the cmd
+                argument for the output directory of your script. For example, if your script
+                uses "output_dir" directory for writing checkpoints, then set this parameter
+                to "output_dir" and it will automatically be filled with the value of `exp_folder`,
+                being equivalent to "--output_dir=exp_folder". Note that `exp_folder` parameter can
+                be a template, which might make it easy for you to embed some hyper-parameters to this folder.
             :param exp_folder: absolute path of the root folder where you want your experiments to be
-            :param scheduling: a dictionary containing keys `gpus`, `max_jobs_per_gpu`, `params_values` and `distributed_training`
-                - `gpus` is a list containing IDs of GPUs you want to run your tasks on
-                - `distributed_training` a boolean indicating whether the experiment uses DataParallel or not. If set to True, then all GPUs
-                in the `gpus` list will be used for CUDA_VISIBLE_DEVICES. Otherwise, only one GPU id will be used for CUDA_VISIBLE_DEVICES.
-                - `max_jobs_per_gpu` specifies how many processes should run on each GPU at most (num_processes = len(gpus) * max_jobs_per_gpu)
-                - `param_values` a dictionary that contains values for your hyper-parameters parameters (the cartesian product will be computed)
-            :param launch_blocking: when set to True, the all programs will be run with the flag CUDA_LAUNCH_BLOCKING=1
-            :param torchrun: whether to run with torchrun or not
             :param debug: print commands if True, run commands if False
             :param create_state_finished: whether to create the file "state.finished" or not
+            :param cfg_sched:an object of type SchedulingConfig
+            :param cfg_torchrun: an object of type TorchRunConfig
         """
-        assert 'gpus' in scheduling.keys(), 'scheduling requires `gpu` key'
-        assert 'params_values' in scheduling.keys(), 'scheduling requires `params_values` key'
-        assert 'max_jobs_per_gpu' in scheduling.keys(), 'scheduling requires `max_jobs_per_gpu` key'
-        assert 'distributed_training' in scheduling.keys(), 'scheduling requires `distributed_training` key'
-        for k in scheduling['params_values'].keys():
-            assert isinstance(scheduling['params_values'][k], list), f'They key "{k}" in scheduling["params_values"] must be of type list!'
-
-        # remove duplicate values to avoid wasting computations
-        for k in scheduling['params_values'].keys():
-            scheduling['params_values'][k] = list(set(scheduling['params_values'][k]))
-
-        n_gpus = len(scheduling['gpus'])
-        if scheduling['distributed_training']: # use all GPUs for a single run (distributed training)
-            n_workers = scheduling['max_jobs_per_gpu']
+        n_gpus = len(cfg_sched.gpus)
+        if cfg_sched.distributed_training: # use all GPUs for a single run (distributed training)
+            n_workers = cfg_sched.max_jobs_per_gpu
         else: # use GPUs to run one experiment per GPU
-            n_workers = n_gpus * scheduling['max_jobs_per_gpu']
+            n_workers = n_gpus * cfg_sched.max_jobs_per_gpu
 
         self.exp_folder_template = deepcopy(exp_folder)
         os.system('cls' if on_windows() else 'clear')
@@ -141,9 +108,9 @@ class GridSearcher:
         cmds_dict = [] # will store dictionaries containing key:value pairs of hyper-parameters
         root_folders = [] # each command will have a separate value for the output folder specified by param_name_for_exp_root_folder
 
-        params = list(scheduling['params_values'].keys()) # if we do grid search for lr and wd, then params will contain "lr" and "wd"
+        params = list(cfg_sched.params_values.keys()) # if we do grid search for lr and wd, then params will contain "lr" and "wd"
 
-        cart_prod = list(product(*list(scheduling['params_values'].values()))) # perform the cartesian product of all hyper-parameters
+        cart_prod = list(product(*list(cfg_sched.params_values.values()))) # perform the cartesian product of all hyper-parameters
         for i, values in enumerate(cart_prod):
             # for each element of cartesian product (contained in `values`), we have to (follow the steps given by numbers):
 
@@ -177,7 +144,7 @@ class GridSearcher:
         else: # actually run the processes for hyper-parameter optimizations
             manager = mp.Manager()
             gpu_processes_count = manager.dict() # shared dict, where key=gpu_id and value=how many processes were run that GPU id
-            for gpu in scheduling['gpus']:
+            for gpu in cfg_sched.gpus:
                 gpu_processes_count[gpu] = 0
 
             """
@@ -208,16 +175,15 @@ class GridSearcher:
                     (
                         self.exe, # python or composer
                         index, # run index, zero based
-                        *tpl, # cmd, root, cmd_dict
+                        cmd,
+                        root,
+                        cmd_dict,
                         gpu_processes_count, # shared dict where key=gpu id and value=processes cound per gpu id
-                        scheduling['gpus'], # GPU ids
-                        scheduling['max_jobs_per_gpu'], # how many jobs we accept per GPU
-                        scheduling['distributed_training'], # whether to do distributed training on multiple GPUs or not
-                        launch_blocking, # whether to run with CUDA_LAUNCH_BLOCKING=1 or not
-                        torchrun, # whether to run the scripts with torchrun or not
+                        cfg_sched,
+                        cfg_torchrun,
                         create_state_finished
                     )
-                    for index, tpl in enumerate(params_list)
+                    for index, (cmd, root, cmd_dict) in enumerate(params_list)
                 ]
 
                 with mp.Pool(processes=n_workers) as pool:
@@ -229,10 +195,13 @@ class GridSearcher:
 
     def _create_root_arg(self, param_name_for_exp_root_folder, exp_folder):
         """
+        Description:
             This method fills in the exp_folder template and adds it to the __dict__ to be used as output directory.
             For example, if your python script requires setting the parameter "output_dir" to specify where to save checkpoints,
             then you can specify param_name_for_exp_root_folder="output_dir" and the value for this parameter will be given by
             the value of `exp_folder` (which can be a template).
+
+        Args:
             :param param_name_for_exp_root_folder: a string containing the argument name for the experiment root folder
         """
         exp_root_folder = self._fill_template(exp_folder) # fill in the template
@@ -241,11 +210,14 @@ class GridSearcher:
 
     def _fill_template(self, template):
         """
-        This method fills in the `template` given as parameter with values stored in `self.__dict__`.
-        If the template uses a variable which is not in `self.__dict__` yet, the method returns the template again because that parameter
-        is expected to be set in the next steps when iterating through the elements of the cartesian product.
-        :param template: Template or string. If Template, we try to fill it. If string, then it's immediately returned.
-        :return: a string containing the template with substitutions or the same template if no substitutions could be made
+        Description:
+            This method fills in the `template` given as parameter with values stored in `self.__dict__`.
+            If the template uses a variable which is not in `self.__dict__` yet, the method returns the template again because that parameter
+            is expected to be set in the next steps when iterating through the elements of the cartesian product.
+
+        Args:
+            :param template: Template or string. If Template, we try to fill it. If string, then it's immediately returned.
+            :return: a string containing the template with substitutions or the same template if no substitutions could be made
         """
         if isinstance(template, str):
             return template
@@ -279,6 +251,7 @@ class GridSearcher:
 
     def _build_command(self):
         """
+        Description:
             This method actually builds the list of parameters of form "--key=value" or "--key value".
             It can handle boolean parameters: if key=True, then only "--key" is added, for example "--bf16" sets bf16=True in the script
             We also support parameters that have dot or dash characters, such as "--train.lr" or "--optimizer-name". In these cases,

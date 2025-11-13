@@ -4,7 +4,7 @@ import time
 import yaml
 import platform
 from tqdm import tqdm
-from enum import Enum
+from enum import Enum, auto
 from .file_locker import lock_acquire, lock_release
 
 class GSExe(Enum):
@@ -14,6 +14,36 @@ class GSExe(Enum):
 class GSKeyValSep(Enum):
     SPACE = ' '
     EQUAL = '='
+
+
+def backward_key_replace(key):
+    """
+        Replaces the characters given by BW_DICT.keys() with BW_DICT.values()
+        Example:
+        - if scheduling['params_values'] has a key called 'trainingDOTlr', this function will convert it to 'training.lr'; same for DASH
+
+        This method is used when creating the command by replacing DOT and DASH words to the corresponding characters.
+    """
+    return key_replace(BW_DICT, key)
+
+def forward_key_replace(key):
+    """
+        Replaces the characters given by FW_DICT.keys() with FW_DICT.values()
+        Example:
+        - if scheduling['params_values'] has a key called 'training.lr', this function will convert it to 'trainingDOTlr'; same for DASH
+
+        This method is used when storing the paameters key:value in __dict__ because keys in this dictionary cannot contain dots or dashes.
+    """
+    return key_replace(FW_DICT, key)
+
+def key_replace(d, key):
+    """
+        Iterates through the dictionary `d` and replaces strings from keys with strings from values
+    """
+    for dk, dv in d.items():
+        key = key.replace(dk, dv)
+    return key
+
 
 def validate_constructor_params(
         script: str,
@@ -56,16 +86,15 @@ def waiting_worker(params):
     """
         This method will run an experiment with a single element of the cartesian product, on a single process.
     """
-    exe, index, cmd, root, cmd_dict, gpu_processes_count, gpus, max_jobs, dist_train, launch_blocking, torchrun, create_state_finished = params
-
-    n_gpus = len(gpus)
+    exe, index, cmd, root, cmd_dict, gpu_processes_count, cfg_sched, cfg_torchrun, create_state_finished = params
+    n_gpus = len(cfg_sched.gpus)
     """
-        Each process sleeps index+5 seconds, where index is the command index. This is necessary because the scripts do not allocate
-        GPU memory immediately
+        Each process sleeps index+5 seconds, where index is the command index.
+        This is necessary because the scripts do not allocate GPU memory immediately.
     """
     time.sleep(index + 5)
 
-    if not dist_train:
+    if not cfg_sched.distributed_training:
         n_gpus = 1
         while True:
             """
@@ -79,14 +108,14 @@ def waiting_worker(params):
             i = 1
             while i < n_gpus and sorted_items[i][0] == count: # advance i to the first GPU that has a different number of jobs (!= count)
                 i += 1
-            if count < max_jobs: # if we can fit another job there
+            if count < cfg_sched.max_jobs_per_gpu: # if we can fit another job there
                 gpu = random.choice([g for g, c in sorted_items[:i]]) # randomly generate a GPU id among the least busy ones)
                 lock_acquire() # acquire the lock to change the shared dictionary gpu_processes_count
                 gpu_processes_count[gpu] += 1 # increase number of jobs for the GPU
                 lock_release()
                 break
 
-            print(f'All GPUs in have {max_jobs} jobs, waiting 60 seconds...')
+            print(f'All GPUs in have {cfg_sched.max_jobs_per_gpu} jobs, waiting 60 seconds...')
             time.sleep(60)
 
     # create the root folder, e.g. param_name_for_exp_root_folder
@@ -99,33 +128,42 @@ def waiting_worker(params):
                 w.write(f'{k[1:]}={v}\n')
 
     # set CUDA_VISIBLE_DEVICES variable
-    if dist_train:
-        gpus = ",".join(map(str, gpus))
+    if cfg_sched.distributed_training:
+        gpus = ",".join(map(str, cfg_sched.gpus))
         cvd = f'CUDA_VISIBLE_DEVICES={gpus}'
     else:
         cvd = f'CUDA_VISIBLE_DEVICES={gpu}' # the randomly chosen GPU
 
     # set CUDA_LAUNCH_BLOCKING variable
-    clb = 'CUDA_LAUNCH_BLOCKING=1' if launch_blocking else ''
+    clb = 'CUDA_LAUNCH_BLOCKING=1' if cfg_torchrun.launch_blocking else ''
 
-    master_addr_port = f'NCCL_SOCKET_IFNAME=lo MASTER_ADDR=127.0.0.1 MASTER_PORT=29500'
+    # master_addr_port = f'NCCL_SOCKET_IFNAME=lo MASTER_ADDR=127.0.0.1 MASTER_PORT=29500'
 
-    if torchrun:
-        # single_proc_extra_args = '--rdzv-backend=c10d --rdzv-endpoint=localhost:0' if n_gpus == 1 else ''
-        rdzv = f'--rdzv_backend=static --rdzv_endpoint=127.0.0.1:29500'
-        cmd = f'{clb} {master_addr_port} {cvd} torchrun {rdzv} --nnodes=1 --nproc-per-node={n_gpus} {single_proc_extra_args} {cmd}'.strip()
+    if cfg_torchrun.torchrun:
+        addr = cfg_torchrun.master_addr
+        port = cfg_torchrun.master_port
+        final_cmd = ' '.join([
+            clb,
+            cvd,
+            'torchrun',
+            f'--rdzv_backend={cfg_torchrun.rdzv_backend}',
+            f'--rdzv_endpoint={addr}:{port}',
+            f'--nnodes=1',
+            f'--nproc-per-node={n_gpus}',
+            cmd
+        ]).strip()
     else:
-        cmd = f'{clb} {master_addr_port} {cvd} {exe} {cmd}'.strip()
+        final_cmd = ' '.join([clb, cvd, exe, cmd ]).strip()
 
-    print(cmd)
-    code = os.system(cmd)
+    print(final_cmd)
+    code = os.system(final_cmd)
 
     if code == 0 and create_state_finished:
         # write state.finished file to mark that the experiment was finished
         with open(os.path.join(root, 'state.finished'), 'w'):
             pass
 
-    if not dist_train: # if we are not in distributed settings, decrease the number of processes for the GPU that finished the run
+    if not cfg_sched.distributed_training: # if we are not in distributed settings, decrease the number of processes for the GPU that finished the run
         lock_acquire()
         gpu_processes_count[gpu] -= 1
         lock_release()
