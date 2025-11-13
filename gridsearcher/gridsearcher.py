@@ -73,10 +73,10 @@ class GridSearcher:
     def run(self,
             param_name_for_exp_root_folder: str,
             exp_folder: Template,
-            debug: bool = False,
-            create_state_finished: bool = True,
             cfg_sched: SchedulingConfig,
-            cfg_torchrun: TorchRunConfig):
+            cfg_torchrun: TorchRunConfig,
+            debug: bool = False,
+            create_state_finished: bool = True):
         """
         Description:
             Runs the GridSearcher using the provided configuration.
