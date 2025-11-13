@@ -48,9 +48,9 @@ class TorchRunConfig:
     Attributes:
         launch_blocking (int): if set to 1, then add CUDA_LAUNCH_BLOCKING=1 to the command line
         torchrun (bool): whether to run with torchrun or not
-        master_addr (str):
-        master_port (int):
-        rdzv_backend (str):
+        master_addr (str): IP address of the master node
+        master_port (int): port of the master node
+        rdzv_backend (str): use "static" to use a predefined configuration to avoid trying to discover or resolve the hostname over the network
     """
     launch_blocking: int = 0
     torchrun: bool = True
