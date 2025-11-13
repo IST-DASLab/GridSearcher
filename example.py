@@ -1,7 +1,7 @@
 import os
 from string import Template
 from datetime import datetime
-from gridsearcher import GridSearcher
+from gridsearcher import GridSearcher, TorchRunConfig, SchedulingConfig
 
 def main():
     gs = GridSearcher(
@@ -30,7 +30,7 @@ def main():
                                          '${wandb_group}',
                                          '${wandb_job_type}',
                                          '${wandb_name}')),
-        scheduling=dict(
+        cfg_sched=SchedulingConfig(
             distributed_training=False,
             gpus=[0, 1, 2, 3, 4, 5, 6, 7],
             max_jobs_per_gpu=1,
@@ -45,7 +45,15 @@ def main():
                 eps=['1e-8'],
             )
         ),
-        debug=True # only output the commands
+        cfg_torchrun=TorchRunConfig(
+            launch_blocking=0,
+            torchrun=True,
+            master_addr='127.0.0.1',
+            master_port=29500,
+            rdzv_backend='static', # or c10d to enable address discovery via network
+        ),
+        debug=True, # only output the commands
+
     )
 
 

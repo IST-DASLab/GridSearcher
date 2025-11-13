@@ -96,6 +96,8 @@ We welcome contributions! If you have suggestions for new features or improvemen
 pull request.
 
 # Versions history:
+- **1.1.3** @ 2025-11-13:
+  - introduced `SchedulingConfig` and `TorchRunConfig` to control `rdzv` parameters and `MASTER_ADDR/PORT` for `torchrun`
 - **1.1.2** @ 2025-01-23:
   - added `create_state_finished` parameter to control whether the process writes the file `state.finished` when returns with error code 0 or not
 - **1.1.1**: fixed import issues
