@@ -108,11 +108,14 @@ def waiting_worker(params):
     # set CUDA_LAUNCH_BLOCKING variable
     clb = 'CUDA_LAUNCH_BLOCKING=1' if launch_blocking else ''
 
+    master_addr_port = f'NCCL_SOCKET_IFNAME=lo MASTER_ADDR=127.0.0.1 MASTER_PORT=29500'
+
     if torchrun:
-        single_proc_extra_args = '--rdzv-backend=c10d --rdzv-endpoint=localhost:0' if n_gpus == 1 else ''
-        cmd = f'{clb} {cvd} torchrun --standalone --nnodes=1 --nproc-per-node={n_gpus} {single_proc_extra_args} {cmd}'.strip()
+        # single_proc_extra_args = '--rdzv-backend=c10d --rdzv-endpoint=localhost:0' if n_gpus == 1 else ''
+        rdzv = f'--rdzv_backend=static --rdzv_endpoint=127.0.0.1:29500'
+        cmd = f'{clb} {master_addr_port} {cvd} torchrun {rdzv} --nnodes=1 --nproc-per-node={n_gpus} {single_proc_extra_args} {cmd}'.strip()
     else:
-        cmd = f'{clb} {cvd} {exe} {cmd}'.strip()
+        cmd = f'{clb} {master_addr_port} {cvd} {exe} {cmd}'.strip()
 
     print(cmd)
     code = os.system(cmd)
