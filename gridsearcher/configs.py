@@ -31,7 +31,7 @@ class SchedulingConfig:
 
     def __post_init__(self):
         assert type(self.distributed_training) is bool
-        assert type(self.max_jobs_per_gpu) is bool
+        assert type(self.max_jobs_per_gpu) is int
         assert type(self.gpus) is list and all([type(gpu) is int for gpu in self.gpus])
         assert type(self.params_values) is dict
         assert all([type(k) is str and type(v) is list for k, v in self.params_values.items()])

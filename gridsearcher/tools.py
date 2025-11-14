@@ -15,6 +15,8 @@ class GSKeyValSep(Enum):
     SPACE = ' '
     EQUAL = '='
 
+FW_DICT = {'.': 'DOT', '-': 'DASH'}
+BW_DICT = {v: k for k, v in FW_DICT.items()} # will contain { 'DOT': '.', 'DASH': '-' }
 
 def backward_key_replace(key):
     """

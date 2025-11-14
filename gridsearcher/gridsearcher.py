@@ -5,9 +5,6 @@ from copy import deepcopy
 from .tools import *
 from .configs import SchedulingConfig, TorchRunConfig
 
-FW_DICT = {'.': 'DOT', '-': 'DASH'}
-BW_DICT = {v: k for k, v in FW_DICT.items()} # will contain { 'DOT': '.', 'DASH': '-' }
-
 class GridSearcher:
     def __init__(self,
                  script,
@@ -141,6 +138,7 @@ class GridSearcher:
         if debug: # only print commands to check for correctness, do not run anything
             for index, cmd in enumerate(cmds):
                 print(f'command {index+1}: {self.exe}', cmd.replace('\\', '/'))
+            return cmds
         else: # actually run the processes for hyper-parameter optimizations
             manager = mp.Manager()
             gpu_processes_count = manager.dict() # shared dict, where key=gpu_id and value=how many processes were run that GPU id
