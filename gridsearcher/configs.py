@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from types import List, Dict
+from typing import List, Dict
 import ipaddress
 
 def is_valid_ip(address: str) -> bool:
