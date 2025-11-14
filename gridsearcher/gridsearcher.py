@@ -136,8 +136,32 @@ class GridSearcher:
         # end cartesian product loop
 
         if debug: # only print commands to check for correctness, do not run anything
-            for index, cmd in enumerate(cmds):
-                print(f'command {index+1}: {self.exe}', cmd.replace('\\', '/'))
+            # set CUDA_VISIBLE_DEVICES variable
+            if not cfg_sched.distributed_training:
+                raise RuntimeError(f"Debug mode is only supported for distributed training!")
+
+            gpus = ",".join(map(str, cfg_sched.gpus))
+            cvd = f'CUDA_VISIBLE_DEVICES={gpus}'
+            clb = 'CUDA_LAUNCH_BLOCKING=1' if cfg_torchrun.launch_blocking else ''
+
+            for i in range(len(cmds)):
+                if cfg_torchrun.torchrun:
+                    addr = cfg_torchrun.master_addr
+                    port = cfg_torchrun.master_port
+                    cmds[i] = ' '.join([
+                        clb,
+                        cvd,
+                        'torchrun',
+                        f'--rdzv_backend={cfg_torchrun.rdzv_backend}',
+                        f'--rdzv_endpoint={addr}:{port}',
+                        f'--nnodes=1',
+                        f'--nproc-per-node={n_gpus}',
+                        cmds[i]
+                    ]).strip()
+                else:
+                    cmds[i] = f'{clb} {cvd} {self.exe} {cmds[i]}'.strip()
+            # for index, cmd in enumerate(cmds):
+            #     print(f'command {index+1}: {self.exe}', cmd.replace('\\', '/'))
             return cmds
         else: # actually run the processes for hyper-parameter optimizations
             manager = mp.Manager()

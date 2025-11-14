@@ -134,7 +134,7 @@ def waiting_worker(params):
         gpus = ",".join(map(str, cfg_sched.gpus))
         cvd = f'CUDA_VISIBLE_DEVICES={gpus}'
     else:
-        cvd = f'CUDA_VISIBLE_DEVICES={gpu}' # the randomly chosen GPU
+        cvd = f'CUDA_VISIBLE_DEVICES={gpus}' # the randomly chosen GPU
 
     # set CUDA_LAUNCH_BLOCKING variable
     clb = 'CUDA_LAUNCH_BLOCKING=1' if cfg_torchrun.launch_blocking else ''

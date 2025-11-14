@@ -96,6 +96,8 @@ We welcome contributions! If you have suggestions for new features or improvemen
 pull request.
 
 # Versions history:
+- **1.1.4** @ 2025-11-14:
+  - return commands when `debug=True`, which is useful to combine with `SBATCH` on a cluster that can exclusively be used via SLURM
 - **1.1.3** @ 2025-11-13:
   - introduced `SchedulingConfig` and `TorchRunConfig` to control `rdzv` parameters and `MASTER_ADDR/PORT` for `torchrun`
 - **1.1.2** @ 2025-01-23:
