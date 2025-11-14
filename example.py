@@ -22,7 +22,7 @@ def main():
     gs.add_param('wandb_job_type', Template('lr=${lr}_wd=${wd}_beta1=${beta1}_beta2=${beta2}_eps=${eps}'))
     gs.add_param('wandb_name', Template('seed=${seed}' + datetime.now().strftime("_%Y-%m-%d_%H-%M-%S")))
 
-    gs.run(
+    commands = gs.run(
         # check the value for the parameter root_folder (--root_folder) in commands
         param_name_for_exp_root_folder='root_folder',
         exp_folder=Template(os.path.join('./results',
@@ -53,8 +53,10 @@ def main():
             rdzv_backend='static', # or c10d to enable address discovery via network
         ),
         debug=True, # only output the commands
-
     )
+    print()
+    print(f'Printing commands')
+    print(commands)
 
 
 if __name__ == '__main__':
