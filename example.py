@@ -22,7 +22,7 @@ def main():
     gs.add_param('wandb_job_type', Template('lr=${lr}_wd=${wd}_beta1=${beta1}_beta2=${beta2}_eps=${eps}'))
     gs.add_param('wandb_name', Template('seed=${seed}' + datetime.now().strftime("_%Y-%m-%d_%H-%M-%S")))
 
-    commands = gs.run(
+    cmds = gs.run(
         # check the value for the parameter root_folder (--root_folder) in commands
         param_name_for_exp_root_folder='root_folder',
         exp_folder=Template(os.path.join('./results',
@@ -31,7 +31,7 @@ def main():
                                          '${wandb_job_type}',
                                          '${wandb_name}')),
         cfg_sched=SchedulingConfig(
-            distributed_training=False,
+            distributed_training=True,
             gpus=[0, 1, 2, 3, 4, 5, 6, 7],
             max_jobs_per_gpu=1,
             params_values=dict(
@@ -56,7 +56,9 @@ def main():
     )
     print()
     print(f'Printing commands')
-    print(commands)
+    for c in cmds:
+        print(c)
+        print()
 
 
 if __name__ == '__main__':
