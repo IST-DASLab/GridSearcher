@@ -96,6 +96,8 @@ We welcome contributions! If you have suggestions for new features or improvemen
 pull request.
 
 # Versions history:
+- **1.1.5** @ 2026-03-17:
+  - fixed typo when `distributed_training=False` in `waiting_worker`
 - **1.1.4** @ 2025-11-14:
   - return commands when `debug=True`, which is useful to combine with `SBATCH` on a cluster that can exclusively be used via SLURM
 - **1.1.3** @ 2025-11-13:
