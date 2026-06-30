@@ -96,6 +96,12 @@ We welcome contributions! If you have suggestions for new features or improvemen
 pull request.
 
 # Versions history:
+- **1.1.6** @ 2026-06-30:
+  - added function `wait_for_resources()` at the beginning of the `run` function. The user can now wait for certain GPUs to be free or 
+    delay the start of the script. Detailed example of the arguments:
+    - `--wait_pids 123 456 789` - wait for the processes with the specified PIDs to finish before running GridSearcher
+    - `--wait_secs 10` - wait 10 seconds before running GridSearcher
+    - `--wait_current` - waits for the current jobs to finish (automatically detects the PIDs of current jobs)
 - **1.1.5** @ 2026-03-17:
   - fixed typo when `distributed_training=False` in `waiting_worker`
 - **1.1.4** @ 2025-11-14:
