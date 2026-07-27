@@ -96,6 +96,9 @@ We welcome contributions! If you have suggestions for new features or improvemen
 pull request.
 
 # Versions history:
+- **1.1.7** @ 2026-07-27:
+  - moved function `wait_for_resources` to separate file to be easily imported in other `GridSearcher` scripts to manage waiting for 
+    other processes
 - **1.1.6** @ 2026-06-30:
   - added function `wait_for_resources()` at the beginning of the `run` function. The user can now wait for certain GPUs to be free or 
     delay the start of the script. Detailed example of the arguments:
